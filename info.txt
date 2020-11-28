@@ -1,0 +1,2 @@
+1. The board is a 8x8 2d list. Each element of the list (ChessMain > self.board) is represented by two characters. The first represents the 
+color the second represents the type of piece.
