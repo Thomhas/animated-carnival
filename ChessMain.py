@@ -15,7 +15,7 @@ def loadImages():
 
     for piece in pieces:
         IMAGES[piece] = p.transform.scale(p.image.load(
-            'chess/images/' + piece + '.png'), (SQ_SIZE, SQ_SIZE))
+            'images/' + piece + '.png'), (SQ_SIZE, SQ_SIZE))
     # Note: with this we can acces the image of a specific pieces with IMAGES['#piecename']
 
 
@@ -31,11 +31,37 @@ def main():
     gs = ChessEngine.GameState()
     loadImages()
     running = True
+    sqSelected = ()
+    playerClicks = []
+
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
-
+            # MOUSE handeler
+            elif e.type == p.MOUSEBUTTONDOWN:
+                # p.mouse.get.pos() returns the cordinates of the mouse position
+                location = p.mouse.get_pos()
+                # now the coordinates have to be changed into squares
+                col = location[0]//SQ_SIZE
+                row = location[1]//SQ_SIZE
+                if sqSelected == (row, col):  # if you select the same space a second time
+                    sqSelected = ()  # deselect click
+                    playerClicks = []  # remove the log of player clicks
+                else:
+                    sqSelected = (row, col)
+                    playerClicks.append(sqSelected)
+                if len(playerClicks) == 2:  # after the second click
+                    move = ChessEngine.Move(
+                        playerClicks[0], playerClicks[1], gs.board)
+                    print(move.getChessNotation())
+                    gs.makeMove(move)
+                    sqSelected = ()  # reset the clicks
+                    playerClicks = []  # reset the clicks
+            # KEY handeler
+            elif e.type == p.KEYDOWN:
+                if e.key == p.K_z:  # undo when z is pressed
+                    gs.undoMove()
         drawGameState(screen, gs)
         clock.tick(MAX_FPS)
         p.display.flip()
