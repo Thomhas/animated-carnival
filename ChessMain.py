@@ -29,6 +29,9 @@ def main():
     screen = p.display.set_mode((WIDTH, HEIGHT))
     clock = p.time.Clock()
     gs = ChessEngine.GameState()
+    validMoves = gs.getValidMoves()
+    moveMade = False  # variable to make sure that a move is valid
+
     loadImages()
     running = True
     sqSelected = ()
@@ -55,13 +58,19 @@ def main():
                     move = ChessEngine.Move(
                         playerClicks[0], playerClicks[1], gs.board)
                     print(move.getChessNotation())
-                    gs.makeMove(move)
+                    if move in validMoves:
+                        gs.makeMove(move)
+                        moveMade = True
                     sqSelected = ()  # reset the clicks
                     playerClicks = []  # reset the clicks
             # KEY handeler
             elif e.type == p.KEYDOWN:
                 if e.key == p.K_z:  # undo when z is pressed
                     gs.undoMove()
+                    moveMade = True
+        if moveMade:
+            validMoves = gs.getValidMoves()
+            moveMade = False
         drawGameState(screen, gs)
         clock.tick(MAX_FPS)
         p.display.flip()
@@ -79,7 +88,7 @@ def drawGameState(screen, gs):
 
 
 def drawBoard(screen):
-    colors = [p.Color('light gray'), p.Color('dark green')]
+    colors = [p.Color('gray'), p.Color('white')]
     for row in range(DIMENSION):
         for col in range(DIMENSION):
             squareColor = colors[((row+col) % 2)]

@@ -51,9 +51,9 @@ class GameState():
         # loops for every row
         for row in range(len(self.board)):
             # loops for every column in the row
-            for col in range(self.board[row]):
+            for col in range(len(self.board[row])):
                 turn = self.board[row][col][0]
-                if (turn == 'w' and self.whiteToMove) and (turn == 'b' and not self.whiteToMove):
+                if (turn == 'w' and self.whiteToMove) or (turn == 'b' and not self.whiteToMove):
                     piece = self.board[row][col][1]
                     if piece == 'p':
                         self.getPawnMoves(row, col, moves)
@@ -67,6 +67,7 @@ class GameState():
                         self.getKingMoves(row, col, moves)
                     elif piece == 'Q':
                         self.getQueenMoves(row, col, moves)
+        return moves
 
     '''
     FUNCTIONS FOR POSSIBLE MOVES FOR ALL THE DIFFERENT PIECES
@@ -76,13 +77,58 @@ class GameState():
     All the possible pawn moves
     '''
 
-    def getPawnMoves(self, row, col, board):
+    def getPawnMoves(self, row, col, moves):
+        # WHITE PAWNS
+        if self.whiteToMove:
+            if self.board[row-1][col] == '--':  # check if the square is empty
+                moves.append(Move((row, col), (row-1, col), self.board))
+                # TWO SQUARE PAWN ADVANCED
+                if row == 6 and self.board[row-2][col] == '--':
+                    moves.append(Move((row, col), (row-2, col), self.board))
+            if col - 1 >= 0:
+                if self.board[row-1][col-1][0] == 'b':
+                    # upp and to the left
+                    moves.append(Move((row, col), (row-1, col-1), self.board))
+            if col + 1 <= 7:
+                if self.board[row-1][col+1][0] == 'b':
+                    # upp and to the right
+                    moves.append(Move((row, col), (row-1, col+1), self.board))
+        # BLACK PAWNS
+        elif not self.whiteToMove:
+            if self.board[row+1][col] == '--':  # check if square in front is empty
+                moves.append(Move((row, col), (row+1, col), self.board))
+                # TWO SQUARE PAWN ADVANCED
+                if row == 1 and self.board[row+2][col] == '--':
+                    moves.append(Move((row, col), (row+2, col), self.board))
+            if col - 1 >= 0:
+                if self.board[row+1][col-1][0] == 'w':
+                    #down and left
+                    moves.append(Move((row, col), (row+1, col-1), self.board))
+            if col + 1 <= 7:
+                if self.board[row+1][col+1][0] == 'w':
+                    #down and right
+                    moves.append(Move((row, col), (row+1, col+1), self.board))
+
+    def getRockMoves(self, row, col, board):
+        pass
+
+    def getBishopMoves(self, row, col, board):
+        pass
+
+    def getKnightMoves(self, row, col, board):
+        pass
+
+    def getKingMoves(self, row, col, board):
+        pass
+
+    def getQueenMoves(self, row, col, board):
+        pass
 
 
 class Move():
 
     # maps key to values
-    #key : value
+    # key : value
     ranksToRows = {'1': 7, '2': 6, '3': 5,
                    '4': 4, '5': 3, '6': 2, '7': 1, '8': 1}
     rowsToRanks = {v: k for k, v in ranksToRows.items()}
@@ -97,6 +143,19 @@ class Move():
         self.endCol = endSq[1]
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
+
+        self.MoveID = self.startRow * 1000 * self.startCol * \
+            100 + self.endRow * 10 + self.endCol
+        print(self.MoveID)
+
+    '''
+    Override the equals sing
+    '''
+
+    def __eq__(self, other):
+        if isinstance(other, Move):
+            return self.MoveID == other.MoveID
+        return False
 
     def getChessNotation(self):
         # this can be changed to feel like real chess notation
